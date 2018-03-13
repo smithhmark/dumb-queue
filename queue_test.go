@@ -22,6 +22,14 @@ func TestSPQPutOneItem(t *testing.T) {
         }
 }
 
+func TestSPQErrorOnEmpty(t *testing.T) {
+        q  := new(SlowGetQueue)
+        _, err := q.Get()
+        if err == nil {
+                t.Fatalf("Get on empty queue should error")
+        }
+}
+
 func TestSPQPutOneGetOneItem(t *testing.T) {
         //fmt.Println("start")
         q  := new(SlowGetQueue)
@@ -30,7 +38,10 @@ func TestSPQPutOneGetOneItem(t *testing.T) {
         if len(q.a) != 1 && len(q.b) != 0{
                 t.Fatalf("Put lost item")
         }
-        ii := q.Get()
+        ii, err := q.Get()
+        if err != nil {
+                t.Fatalf("Get should work if theres data in the queue")
+        }
         if ii != item {
                 t.Fatalf("Get did not return item")
         }

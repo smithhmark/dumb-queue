@@ -1,6 +1,7 @@
 package dumbqueue
 
 import "fmt"
+import "errors"
 
 type SlowGetQueue struct {
         a []int
@@ -11,7 +12,11 @@ func (q *SlowGetQueue) Put(ii int) {
         q.a = append(q.a, ii);
 }
 
-func (q *SlowGetQueue) Get() (ret int) {
+func (q *SlowGetQueue) Get() (ret int, err error) {
+        if len(q.a) == 0 {
+                return 0, errors.New("Queue is empty")
+        }
+        err = nil
         fmt.Println("begin Get")
         for _, ii := range q.a {
                 q.b = append(q.b, ii)
