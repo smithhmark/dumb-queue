@@ -26,7 +26,7 @@ type SlowGetQueue struct {
 	b *Stack
 }
 
-func NewSlowGetQueue() *SlowGetQueue {
+func NewSlowGetQueue() Queue {
 	q := &SlowGetQueue{NewStack(), NewStack()}
 	return q
 }
@@ -62,28 +62,33 @@ type SlowPutQueue struct {
 	b *Stack
 }
 
-func NewSlowPutQueue() *SlowPutQueue {
+func (q SlowPutQueue) Stack1()  *Stack { return q.a }
+func (q SlowPutQueue) Stack2()  *Stack { return q.b }
+
+func NewSlowPutQueue() Queue {
 	q := &SlowPutQueue{NewStack(), NewStack()}
 	return q
 }
 
-func (q *SlowPutQueue) Put(ii int) {
+func (q SlowPutQueue) Size() int {
+	return q.a.Size()
+}
+
+func (q SlowPutQueue) Put(item interface{}) {
 	rev(q.a, q.b)
-	q.b.Push(ii)
+	q.b.Push(item)
 	rev(q.b, q.a)
 }
 
-func (q *SlowPutQueue) Get() (ret int, err error) {
+func (q SlowPutQueue) Get() (ret interface{}, err error) {
 	if q.a.Size() == 0 {
 		return 0, errors.New("Queue is empty")
 	}
 
-	var val interface{}
-	val, err = q.a.Pop()
+	ret, err = q.a.Pop()
 	if err != nil {
 		return 0, errors.New("Something smells in Denmark...")
 	}
-	ret = val.(int)
 	err = nil
 	return
 }

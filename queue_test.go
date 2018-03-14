@@ -4,28 +4,16 @@ import (
 	"testing"
 	//"fmt"
 )
-/*
-func testStackQConst(qfn func() StackBasedQueue, t *testing.T) {
-	q := qfn()
-	if q.Stack1().Size() != 0 || q.Stack2().Size() != 0 {
-		t.Fatalf("new queue has stuff in it")
-	}
-}
-
-func TestInterfaces(t *testing.T) {
-	testStackQConst( NewSlowGetQueue, t)
-}
-*/
 
 func TestSGQConstruction(t *testing.T) {
-	q := NewSlowGetQueue()
+	q := NewSlowGetQueue().(*SlowGetQueue)
 	if q.a.Size() != 0 || q.b.Size() != 0 {
 		t.Fatalf("new queue has stuff in it")
 	}
 }
 
 func TestSGQPutOneItem(t *testing.T) {
-	q := NewSlowGetQueue()
+	q := NewSlowGetQueue().(*SlowGetQueue)
 	q.Put(0)
 	if q.a.Size() != 1 && q.b.Size() != 0 {
 		t.Fatalf("Put lost item")
@@ -33,7 +21,7 @@ func TestSGQPutOneItem(t *testing.T) {
 }
 
 func TestSGQErrorOnEmpty(t *testing.T) {
-	q := NewSlowGetQueue()
+	q := NewSlowGetQueue().(*SlowGetQueue)
 	_, err := q.Get()
 	if err == nil {
 		t.Fatalf("Get on empty queue should error")
@@ -42,7 +30,7 @@ func TestSGQErrorOnEmpty(t *testing.T) {
 
 func TestSGQPutOneGetOneItem(t *testing.T) {
 	//fmt.Println("start")
-	q := NewSlowGetQueue()
+	q := NewSlowGetQueue().(*SlowGetQueue)
 	item := 0
 	q.Put(item)
 	if q.a.Size() != 1 && q.b.Size() != 0 {
