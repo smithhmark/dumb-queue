@@ -7,23 +7,23 @@ import (
 
 func TestSPQConstruction(t *testing.T) {
 	//fmt.Println("start")
-	q := new(SlowGetQueue)
-	if len(q.a) != 0 || len(q.b) != 0 {
+	q := NewSlowGetQueue()
+	if q.a.Size() != 0 || q.b.Size() != 0 {
 		t.Fatalf("new queue has stuff in it")
 	}
 }
 
 func TestSPQPutOneItem(t *testing.T) {
 	//fmt.Println("start")
-	q := new(SlowGetQueue)
+	q := NewSlowGetQueue()
 	q.Put(0)
-	if len(q.a) != 1 && len(q.b) != 0 {
+	if q.a.Size() != 1 && q.b.Size() != 0 {
 		t.Fatalf("Put lost item")
 	}
 }
 
 func TestSPQErrorOnEmpty(t *testing.T) {
-	q := new(SlowGetQueue)
+	q := NewSlowGetQueue()
 	_, err := q.Get()
 	if err == nil {
 		t.Fatalf("Get on empty queue should error")
@@ -32,10 +32,10 @@ func TestSPQErrorOnEmpty(t *testing.T) {
 
 func TestSPQPutOneGetOneItem(t *testing.T) {
 	//fmt.Println("start")
-	q := new(SlowGetQueue)
+	q := NewSlowGetQueue()
 	item := 0
 	q.Put(item)
-	if len(q.a) != 1 && len(q.b) != 0 {
+	if q.a.Size() != 1 && q.b.Size() != 0 {
 		t.Fatalf("Put lost item")
 	}
 	ii, err := q.Get()
@@ -45,7 +45,7 @@ func TestSPQPutOneGetOneItem(t *testing.T) {
 	if ii != item {
 		t.Fatalf("Get did not return item")
 	}
-	if len(q.a) != 0 && len(q.b) != 0 {
+	if q.a.Size() != 0 && q.b.Size() != 0 {
 		t.Fatalf("Get didn't clear out inventory")
 	}
 }

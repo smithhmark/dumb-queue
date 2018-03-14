@@ -4,33 +4,39 @@ package dumbqueue
 import "errors"
 
 type SlowGetQueue struct {
-	a []int
-	b []int
+	a *Stack
+	b *Stack
+}
+
+func NewSlowGetQueue() *SlowGetQueue {
+	q := &SlowGetQueue{NewStack(), NewStack()}
+	return q
 }
 
 func (q *SlowGetQueue) Put(ii int) {
-	q.a = append(q.a, ii)
+	q.a.Push(ii)
 }
 
 func (q *SlowGetQueue) Get() (ret int, err error) {
-	if len(q.a) == 0 {
+	if q.a.Size() == 0 {
 		return 0, errors.New("Queue is empty")
 	}
+	for q.a.Size() > 0 {
+		val, _ := q.a.Pop()
+		q.b.Push(val)
+	}
+
+	var val interface{}
+	val, err = q.b.Pop()
+	if err != nil {
+		return 0, errors.New("Something smells in Denmark...")
+	}
+	ret = val.(int)
+
+	for q.b.Size() > 0 {
+		val, _ := q.b.Pop()
+		q.a.Push(val)
+	}
 	err = nil
-	for _, ii := range q.a {
-		q.b = append(q.b, ii)
-	}
-	q.a = q.a[:0]
-	// q.a = nil
-
-	ret = q.b[len(q.b)-1]
-
-	q.b = q.b[:len(q.b)-1]
-
-	for _, ii := range q.b {
-		q.a = append(q.a, ii)
-	}
-	q.b = q.b[:0]
-	// q.b = nil
 	return
 }
