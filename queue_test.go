@@ -4,17 +4,27 @@ import (
 	"testing"
 	//"fmt"
 )
+/*
+func testStackQConst(qfn func() StackBasedQueue, t *testing.T) {
+	q := qfn()
+	if q.Stack1().Size() != 0 || q.Stack2().Size() != 0 {
+		t.Fatalf("new queue has stuff in it")
+	}
+}
 
-func TestSPQConstruction(t *testing.T) {
-	//fmt.Println("start")
+func TestInterfaces(t *testing.T) {
+	testStackQConst( NewSlowGetQueue, t)
+}
+*/
+
+func TestSGQConstruction(t *testing.T) {
 	q := NewSlowGetQueue()
 	if q.a.Size() != 0 || q.b.Size() != 0 {
 		t.Fatalf("new queue has stuff in it")
 	}
 }
 
-func TestSPQPutOneItem(t *testing.T) {
-	//fmt.Println("start")
+func TestSGQPutOneItem(t *testing.T) {
 	q := NewSlowGetQueue()
 	q.Put(0)
 	if q.a.Size() != 1 && q.b.Size() != 0 {
@@ -22,7 +32,7 @@ func TestSPQPutOneItem(t *testing.T) {
 	}
 }
 
-func TestSPQErrorOnEmpty(t *testing.T) {
+func TestSGQErrorOnEmpty(t *testing.T) {
 	q := NewSlowGetQueue()
 	_, err := q.Get()
 	if err == nil {
@@ -30,7 +40,7 @@ func TestSPQErrorOnEmpty(t *testing.T) {
 	}
 }
 
-func TestSPQPutOneGetOneItem(t *testing.T) {
+func TestSGQPutOneGetOneItem(t *testing.T) {
 	//fmt.Println("start")
 	q := NewSlowGetQueue()
 	item := 0
@@ -50,7 +60,7 @@ func TestSPQPutOneGetOneItem(t *testing.T) {
 	}
 }
 
-func benchQPuts(q *SlowGetQueue, size int, b *testing.B) {
+func benchQPuts(q Queue, size int, b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		for ii := 0; ii < size; ii++ {
 			q.Put(ii)
@@ -58,7 +68,7 @@ func benchQPuts(q *SlowGetQueue, size int, b *testing.B) {
 	}
 }
 
-func benchQAlt(q *SlowGetQueue, size int, b *testing.B) {
+func benchQAlt(q Queue, size int, b *testing.B) {
 	var test interface{}
 	for n := 0; n < b.N; n++ {
 		for ii := 0; ii < size; ii++ {
@@ -71,7 +81,7 @@ func benchQAlt(q *SlowGetQueue, size int, b *testing.B) {
 	}
 }
 
-func benchQAlt2(q *SlowGetQueue, size int, b *testing.B) {
+func benchQAlt2(q Queue, size int, b *testing.B) {
 	var test interface{}
 	testsz := size >> 1
 	for n := 0; n < b.N; n++ {
@@ -90,7 +100,7 @@ func benchQAlt2(q *SlowGetQueue, size int, b *testing.B) {
 	}
 }
 
-func benchQSwing(q *SlowGetQueue, cnt int, amp int, b *testing.B) {
+func benchQSwing(q Queue, cnt int, amp int, b *testing.B) {
 	var test interface{}
 	var data []int
 	for v := 0; v < amp; v++ {
@@ -111,35 +121,41 @@ func benchQSwing(q *SlowGetQueue, cnt int, amp int, b *testing.B) {
 	}
 }
 
-func BenchmarkSPQPut0(b *testing.B) { benchQPuts(NewSlowGetQueue(), 100, b) }
-func BenchmarkSPQPut1(b *testing.B) { benchQPuts(NewSlowGetQueue(), 1000, b) }
-func BenchmarkSPQPut2(b *testing.B) { benchQPuts(NewSlowGetQueue(), 10000, b) }
-func BenchmarkSPQPut3(b *testing.B) { benchQPuts(NewSlowGetQueue(), 100000, b) }
+func BenchmarkSGQPut0(b *testing.B) {
+	var q Queue
+	q = NewSlowGetQueue()
+	benchQPuts(q, 100, b)
+}
 
-func BenchmarkSPQAlt0(b *testing.B) { benchQAlt(NewSlowGetQueue(), 1000, b) }
-func BenchmarkSPQAlt1(b *testing.B) { benchQAlt(NewSlowGetQueue(), 10000, b) }
-func BenchmarkSPQAlt2(b *testing.B) { benchQAlt(NewSlowGetQueue(), 100000, b) }
-func BenchmarkSPQAlt3(b *testing.B) { benchQAlt(NewSlowGetQueue(), 1000000, b) }
-func BenchmarkSPQAlt4(b *testing.B) { benchQAlt(NewSlowGetQueue(), 10000000, b) }
+func BenchmarkSGQPut1(b *testing.B) { benchQPuts(NewSlowGetQueue(), 1000, b) }
+func BenchmarkSGQPut2(b *testing.B) { benchQPuts(NewSlowGetQueue(), 10000, b) }
+func BenchmarkSGQPut3(b *testing.B) { benchQPuts(NewSlowGetQueue(), 100000, b) }
 
-func BenchmarkSPQAlt20(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 1000, b) }
-func BenchmarkSPQAlt21(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 10000, b) }
-func BenchmarkSPQAlt22(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 100000, b) }
-func BenchmarkSPQAlt23(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 1000000, b) }
-func BenchmarkSPQAlt24(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 10000000, b) }
+func BenchmarkSGQAlt0(b *testing.B) { benchQAlt(NewSlowGetQueue(), 1000, b) }
+func BenchmarkSGQAlt1(b *testing.B) { benchQAlt(NewSlowGetQueue(), 10000, b) }
+func BenchmarkSGQAlt2(b *testing.B) { benchQAlt(NewSlowGetQueue(), 100000, b) }
+func BenchmarkSGQAlt3(b *testing.B) { benchQAlt(NewSlowGetQueue(), 1000000, b) }
+func BenchmarkSGQAlt4(b *testing.B) { benchQAlt(NewSlowGetQueue(), 10000000, b) }
 
-func BenchmarkSPQSw0(b *testing.B) {
+func BenchmarkSGQAlt20(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 1000, b) }
+func BenchmarkSGQAlt21(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 10000, b) }
+func BenchmarkSGQAlt22(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 100000, b) }
+func BenchmarkSGQAlt23(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 1000000, b) }
+func BenchmarkSGQAlt24(b *testing.B) { benchQAlt2(NewSlowGetQueue(), 10000000, b) }
+
+func BenchmarkSGQSw0(b *testing.B) {
 	benchQSwing(NewSlowGetQueue(), 10000000, 1, b)
 }
-func BenchmarkSPQSw1(b *testing.B) {
+func BenchmarkSGQSw1(b *testing.B) {
 	benchQSwing(NewSlowGetQueue(), 5000000, 2, b)
 }
-func BenchmarkSPQSw2(b *testing.B) {
+func BenchmarkSGQSw2(b *testing.B) {
 	benchQSwing(NewSlowGetQueue(), 2000000, 5, b)
 }
-func BenchmarkSPQSw3(b *testing.B) {
+func BenchmarkSGQSw3(b *testing.B) {
 	benchQSwing(NewSlowGetQueue(), 1000000, 10, b)
 }
-func BenchmarkSPQSw4(b *testing.B) {
+func BenchmarkSGQSw4(b *testing.B) {
 	benchQSwing(NewSlowGetQueue(), 500000, 20, b)
 }
+
