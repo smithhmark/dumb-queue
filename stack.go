@@ -38,5 +38,6 @@ func (s *Stack) Pop() (interface{}, error) {
 	np := s.head
 	s.head = np.next
 	s.length--
+	np.next = nil
 	return np.value, nil
 }
