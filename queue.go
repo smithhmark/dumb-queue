@@ -9,6 +9,8 @@ type Queue interface {
 	Size() int
 }
 
+type QueueFactory func () Queue
+
 type StackBasedQueue interface {
 	Stack1() (*Stack)
 	Stack2() (*Stack)
