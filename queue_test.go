@@ -70,94 +70,68 @@ func TestMQPutGet(t *testing.T) {
 	testPutOneGetOneItem(NewModeQueue, t)
 }
 
+func testMQPut(q *ModeQueue, item interface {}, pcnt, gcnt int, t *testing.T){
+	q.Put(item)
+	expectedSize := pcnt - gcnt
+
+	if q.a.Size() != expectedSize {
+		t.Fatalf("ModeQueue stack a should not be empty after(%v puts and %v gets)", pcnt, gcnt)
+	}
+	if q.b.Size() != 0 {
+		t.Fatalf("ModeQueue stack b should start empty after(%v puts and %v gets)", pcnt, gcnt)
+	}
+	if q.putMode != true {
+		t.Fatalf("ModeQueue should be in put mode after(%v puts and %v gets)", pcnt, gcnt)
+	}
+}
+
+func testMQGet(q *ModeQueue, item interface {}, pcnt, gcnt int, t *testing.T){
+	expectedSize := pcnt - gcnt
+	rcvditem, err := q.Get()
+
+	if expectedSize >= 0 {
+		if err != nil { 
+			t.Fatalf("there should be no error getting from non-empty ModeQueue(%v puts and %v gets)", pcnt, gcnt)
+		}
+		testMQState(q, 0, expectedSize, false, "after Get", t)
+		if rcvditem != item {
+			t.Fatalf("ModeQueue lost its item after(%v puts and %v gets)", pcnt, gcnt)
+		}
+
+	} else {
+		if err == nil {
+			t.Fatalf("there should be an error getting from empty ModeQueue(%v puts and %v gets)", pcnt, gcnt)
+		}
+	}
+}
+
+func testMQState(q *ModeQueue, asz, bsz int, putmode bool, msg string, t *testing.T) {
+	if q.a.Size() != asz {
+		t.Fatalf("ModeQueue stack A.Size() should be %v %v", asz, msg)
+	}
+	if q.b.Size() != bsz {
+		t.Fatalf("ModeQueue stack B.Size() should be %v %v", bsz, msg)
+	}
+	if q.putMode != putmode {
+		t.Fatalf("ModeQueue putmode should be %v %v", putmode, msg)
+	}
+}
+
 func TestModeQueue(t *testing.T) {
 	q := NewModeQueue().(*ModeQueue)
 
-	//var sbq StackBasedQueue
-	//sbq = q
-	if q.a.Size() != 0 {
-		t.Fatalf("ModeQueue stack a should start empty")
-	}
-	if q.b.Size() != 0 {
-		t.Fatalf("ModeQueue stack b should start empty")
-	}
-	if q.putMode != true {
-		t.Fatalf("ModeQueue should start in put mode")
-	}
-	q.Put("item1")
-	if q.a.Size() != 1 {
-		t.Fatalf("ModeQueue stack a should not be empty")
-	}
-	if q.b.Size() != 0 {
-		t.Fatalf("ModeQueue stack b should start empty")
-	}
-	if q.putMode != true {
-		t.Fatalf("ModeQueue should still be in put mode")
-	}
-	q.Put("item2")
-	if q.a.Size() != 2 {
-		t.Fatalf("ModeQueue stack a should have two items")
-	}
-	if q.b.Size() != 0 {
-		t.Fatalf("ModeQueue stack b should still be empty")
-	}
-	if q.putMode != true {
-		t.Fatalf("ModeQueue should still be in put mode")
-	}
+	testMQState(q, 0, 0, true, "at initialization", t)
+	testMQPut(q, "item1", 1, 0, t)
+	testMQPut(q, "item2", 2, 0, t)
+	testMQGet(q, "item1", 2, 1, t)
+	testMQGet(q, "item2", 2, 2, t)
 
-	val, err := q.Get()
-	if err != nil { 
-		t.Fatalf("there should be no error getting from non-empty ModeQueue")
-	}
-	if val != "item1" {
-		t.Fatalf("ModeQueue lost its item")
-	}
-	if q.a.Size() != 0 {
-		t.Fatalf("ModeQueue stack a should be empty in get mode")
-	}
-	if q.b.Size() != 1 {
-		t.Fatalf("ModeQueue stack b should have one item after Get")
-	}
-	if q.putMode == true {
-		t.Fatalf("ModeQueue should be in get mode after Get")
-	}
-
-	val, err = q.Get()
-	if err != nil { 
-		t.Fatalf("there should be no error getting from non-empty ModeQueue")
-	}
-	if val != "item2" {
-		t.Fatalf("ModeQueue lost its item")
-	}
-	if q.putMode != false {
-		t.Fatalf("ModeQueue should be in get mode after Get")
-	}
-	if q.Size() != 1 {
-		t.Fatalf("ModeQueue should have 1 items")
-	}
-	if q.a.Size() != 0 {
-		t.Fatalf("ModeQueue stack a should be empty in get mode")
-	}
-	if q.b.Size() != 0 {
-		t.Fatalf("ModeQueue stack b should have one item after Get")
-	}
 	if q.Size() != 0 {
 		t.Fatalf("ModeQueue should have 0 items")
 	}
+	testMQState(q, 0, 0, false, "after getting all items", t)
 
-	q.Put("item3")
-	if q.putMode != true {
-		t.Fatalf("ModeQueue should still be in put mode")
-	}
-	if q.a.Size() != 1 {
-		t.Fatalf("ModeQueue stack a should have one item")
-	}
-	if q.b.Size() != 0 {
-		t.Fatalf("ModeQueue stack b should be empty in put mode")
-	}
-	if q.Size() != 1 {
-		t.Fatalf("ModeQueue should have 1 items")
-	}
+	testMQPut(q, "item3", 3,2,t)
 }
 
 func benchQPuts(q Queue, size int, b *testing.B) {
