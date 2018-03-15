@@ -109,7 +109,7 @@ func NewModeQueue() Queue {
 	return q
 }
 
-func (q ModeQueue) Size() int {
+func (q *ModeQueue) Size() int {
 	if q.putMode {
 		return q.a.Size()
 	} else {
@@ -117,7 +117,7 @@ func (q ModeQueue) Size() int {
 	}
 }
 
-func (q ModeQueue) Put(item interface{}) {
+func (q *ModeQueue) Put(item interface{}) {
 	if !q.putMode {
 		q.putMode = true
 		rev(q.b, q.a)
@@ -125,7 +125,7 @@ func (q ModeQueue) Put(item interface{}) {
 	q.a.Push(item)
 }
 
-func (q ModeQueue) Get() (ret interface{}, err error) {
+func (q *ModeQueue) Get() (ret interface{}, err error) {
 	if q.putMode {
 		rev(q.a, q.b)
 		q.putMode = false
