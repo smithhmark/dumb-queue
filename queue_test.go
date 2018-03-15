@@ -70,6 +70,96 @@ func TestMQPutGet(t *testing.T) {
 	testPutOneGetOneItem(NewModeQueue, t)
 }
 
+func TestModeQueue(t *testing.T) {
+	q := NewModeQueue().(*ModeQueue)
+
+	//var sbq StackBasedQueue
+	//sbq = q
+	if q.a.Size() != 0 {
+		t.Fatalf("ModeQueue stack a should start empty")
+	}
+	if q.b.Size() != 0 {
+		t.Fatalf("ModeQueue stack b should start empty")
+	}
+	if q.putMode != true {
+		t.Fatalf("ModeQueue should start in put mode")
+	}
+	q.Put("item1")
+	if q.a.Size() != 1 {
+		t.Fatalf("ModeQueue stack a should not be empty")
+	}
+	if q.b.Size() != 0 {
+		t.Fatalf("ModeQueue stack b should start empty")
+	}
+	if q.putMode != true {
+		t.Fatalf("ModeQueue should still be in put mode")
+	}
+	q.Put("item2")
+	if q.a.Size() != 2 {
+		t.Fatalf("ModeQueue stack a should have two items")
+	}
+	if q.b.Size() != 0 {
+		t.Fatalf("ModeQueue stack b should still be empty")
+	}
+	if q.putMode != true {
+		t.Fatalf("ModeQueue should still be in put mode")
+	}
+
+	val, err := q.Get()
+	if err != nil { 
+		t.Fatalf("there should be no error getting from non-empty ModeQueue")
+	}
+	if val != "item1" {
+		t.Fatalf("ModeQueue lost its item")
+	}
+	if q.a.Size() != 0 {
+		t.Fatalf("ModeQueue stack a should be empty in get mode")
+	}
+	if q.b.Size() != 1 {
+		t.Fatalf("ModeQueue stack b should have one item after Get")
+	}
+	if q.putMode == true {
+		t.Fatalf("ModeQueue should be in get mode after Get")
+	}
+
+	val, err = q.Get()
+	if err != nil { 
+		t.Fatalf("there should be no error getting from non-empty ModeQueue")
+	}
+	if val != "item2" {
+		t.Fatalf("ModeQueue lost its item")
+	}
+	if q.putMode != false {
+		t.Fatalf("ModeQueue should be in get mode after Get")
+	}
+	if q.Size() != 1 {
+		t.Fatalf("ModeQueue should have 1 items")
+	}
+	if q.a.Size() != 0 {
+		t.Fatalf("ModeQueue stack a should be empty in get mode")
+	}
+	if q.b.Size() != 0 {
+		t.Fatalf("ModeQueue stack b should have one item after Get")
+	}
+	if q.Size() != 0 {
+		t.Fatalf("ModeQueue should have 0 items")
+	}
+
+	q.Put("item3")
+	if q.putMode != true {
+		t.Fatalf("ModeQueue should still be in put mode")
+	}
+	if q.a.Size() != 1 {
+		t.Fatalf("ModeQueue stack a should have one item")
+	}
+	if q.b.Size() != 0 {
+		t.Fatalf("ModeQueue stack b should be empty in put mode")
+	}
+	if q.Size() != 1 {
+		t.Fatalf("ModeQueue should have 1 items")
+	}
+}
+
 func benchQPuts(q Queue, size int, b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		for ii := 0; ii < size; ii++ {

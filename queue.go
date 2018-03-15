@@ -110,7 +110,11 @@ func NewModeQueue() Queue {
 }
 
 func (q ModeQueue) Size() int {
-	return q.a.Size()
+	if q.putMode {
+		return q.a.Size()
+	} else {
+		return q.b.Size()
+	}
 }
 
 func (q ModeQueue) Put(item interface{}) {
