@@ -20,32 +20,54 @@ func TestSGQPutOneItem(t *testing.T) {
 	}
 }
 
-func TestSGQErrorOnEmpty(t *testing.T) {
-	q := NewSlowGetQueue().(*SlowGetQueue)
+func testErrorOnEmpty(qf QueueFactory, t *testing.T) {
+	q:=qf()
 	_, err := q.Get()
 	if err == nil {
 		t.Fatalf("Get on empty queue should error")
 	}
 }
 
-func TestSGQPutOneGetOneItem(t *testing.T) {
-	//fmt.Println("start")
-	q := NewSlowGetQueue().(*SlowGetQueue)
-	item := 0
-	q.Put(item)
-	if q.a.Size() != 1 && q.b.Size() != 0 {
-		t.Fatalf("Put lost item")
+func TestSGQErrorOnEmpty(t *testing.T) {
+	testErrorOnEmpty(NewSlowGetQueue, t)
+}
+func TestSPQErrorOnEmpty(t *testing.T) {
+	testErrorOnEmpty(NewSlowPutQueue, t)
+}
+func TestMQErrorOnEmpty(t *testing.T) {
+	testErrorOnEmpty(NewModeQueue, t)
+}
+
+func testPutOneGetOneItem(qf QueueFactory, t *testing.T) {
+	q := qf()
+	testitem := 0
+	if q.Size() != 0 {
+		t.Fatalf("Queue should be empty")
 	}
-	ii, err := q.Get()
+	q.Put(testitem)
+	if q.Size() != 1 {
+		t.Fatalf("Queue should have one item")
+	}
+	result, err := q.Get()
 	if err != nil {
-		t.Fatalf("Get should work if theres data in the queue")
+		t.Fatalf("Should be no error here")
 	}
-	if ii != item {
-		t.Fatalf("Get did not return item")
+	if result != testitem {
+		t.Fatalf("Didn't get out what we put in")
 	}
-	if q.a.Size() != 0 && q.b.Size() != 0 {
-		t.Fatalf("Get didn't clear out inventory")
+	if q.Size() != 0 {
+		t.Fatalf("Queue didn't shrink as part of Get")
 	}
+}
+
+func TestSGQPutGet(t *testing.T) {
+	testPutOneGetOneItem(NewSlowGetQueue, t)
+}
+func TestSPQPutGet(t *testing.T) {
+	testPutOneGetOneItem(NewSlowPutQueue, t)
+}
+func TestMQPutGet(t *testing.T) {
+	testPutOneGetOneItem(NewModeQueue, t)
 }
 
 func benchQPuts(q Queue, size int, b *testing.B) {
@@ -147,6 +169,7 @@ func BenchmarkSGQSw3(b *testing.B) {
 func BenchmarkSGQSw4(b *testing.B) {
 	benchQSwing(NewSlowGetQueue, 500000, 20, b)
 }
+
 func BenchmarkSPQSw0(b *testing.B) {
 	benchQSwing(NewSlowPutQueue , 10000000, 1, b)
 }
@@ -161,5 +184,21 @@ func BenchmarkSPQSw3(b *testing.B) {
 }
 func BenchmarkSPQSw4(b *testing.B) {
 	benchQSwing(NewSlowPutQueue, 500000, 20, b)
+}
+
+func BenchmarkMQSw0(b *testing.B) {
+	benchQSwing(NewModeQueue , 10000000, 1, b)
+}
+func BenchmarkMQSw1(b *testing.B) {
+	benchQSwing(NewModeQueue, 5000000, 2, b)
+}
+func BenchmarkMQSw2(b *testing.B) {
+	benchQSwing(NewModeQueue, 2000000, 5, b)
+}
+func BenchmarkMQSw3(b *testing.B) {
+	benchQSwing(NewModeQueue, 1000000, 10, b)
+}
+func BenchmarkMQSw4(b *testing.B) {
+	benchQSwing(NewModeQueue, 500000, 20, b)
 }
 
