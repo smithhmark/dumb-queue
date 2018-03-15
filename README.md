@@ -1,4 +1,4 @@
-# dumb-queue
+# dumbqueue
 A horrible queue implementation
 
 ## Purpose
